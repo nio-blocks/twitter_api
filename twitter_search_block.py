@@ -20,13 +20,13 @@ from nio.modules.scheduler import Job
 
 VERIFY_CREDS_URL = ('https://api.twitter.com/1.1/'
                     'account/verify_credentials.json')
-TOKEN_URL = 'https://api.twitter.com/1.1/oauth2/token'
 SEARCH_URL = 'https://api.twitter.com/1.1/search/tweets.json'
 
 
 class TwitterQueryOp(Enum):
     AND = " "
     OR = " OR "
+
 
 class TwitterResultType(Enum):
     MIXED = "mixed"
@@ -61,45 +61,34 @@ class GeoCode(PropertyHolder):
     radius = StringProperty(title="Radius (miles)")
 
 
-class Date(PropertyHolder):
-    year = IntProperty(title="Year")
-    month = IntProperty(title="Month")
-    day = IntProperty(title="Day")
-
-
 @Discoverable(DiscoverableType.block)
 class TwitterSearch(Block):
-    
     interval = TimeDeltaProperty(title="Query Interval",
                                  default={"minutes": 10})
-
-    operator = SelectProperty(
-        TwitterQueryOp,
-        default=TwitterQueryOp.AND,
-        title="Query Operator"
-    )
     tweet_text = ListProperty(str, title="Text includes")
     hashtags = ListProperty(str, title="Hashtags")
     _from = StringProperty(title="From user")
     _to = StringProperty(title="To user")
+    at = ListProperty(str, title="Referenced users")
+    geo = ObjectProperty(GeoCode, title="Geographical")
+    count = IntProperty(title="Max Results", default=25)
+    lookback = IntProperty(title="Query Lookback (days)", default=-1)
+    creds = ObjectProperty(TwitterCreds, title="Credentials")
     tude = SelectProperty(
         TwitterAttitude,
         default=TwitterAttitude.NEUTRAL,
         title="Tone"
     )
-    at = ListProperty(str, title="Referenced users")
-
-    geo = ObjectProperty(GeoCode, title="Geographical")
-    count = IntProperty(title="Max Results", default=25)
-    
-    lookback = IntProperty(title="Query Lookback (days)", default=-1)
-
+    operator = SelectProperty(
+        TwitterQueryOp,
+        default=TwitterQueryOp.AND,
+        title="Query Operator"
+    )
     result_type = SelectProperty(
         TwitterResultType,
         default=TwitterResultType.MIXED,
         title="Result Type"
     )
-    creds = ObjectProperty(TwitterCreds, title="Credentials")
 
     def __init__(self):
         super().__init__()
@@ -157,11 +146,13 @@ class TwitterSearch(Block):
 
         if query:
             self._append_param('q', sep=self.operator.value, vals=query)
+
         if self.geo.latitude:
             self._append_param('geo', ',', 'mi',
                                [self.geo.latitute,
                                 self.geo.longitude,
                                 self.geo.radius])
+
         if self.lookback >= 0:
             now = datetime.utcnow() - timedelta(days=self.lookback)
             vals = [now.year, now.month, now.day]
@@ -170,12 +161,14 @@ class TwitterSearch(Block):
         if self.count:
             self._append_param('count', vals=[self.count])
 
-
         self._append_param('result_type', vals=[self.result_type.value])
+
+    def _append_param(self, p_name, sep='', end='', vals=[]):
+        val_str = quote(sep.join([str(v) for v in vals]) + end)
+        self._url += "{0}={1}&".format(p_name, val_str)
 
     def _process_query(self):
         values = []
-        
         values.extend(self.tweet_text)
         for h in self.hashtags:
             values.append("#{0}".format(h))
@@ -187,13 +180,7 @@ class TwitterSearch(Block):
             values.append("to:{0}".format(self._to))
         if self.tude.value:
             values.append(self.tude.value)
-
         return values
-
-    def _append_param(self, p_name, sep='', end='', vals=[]):
-        val_str = quote(sep.join([str(v) for v in vals]) + end)
-        self._url += "{0}={1}&".format(p_name, val_str)
-        
 
     def _authorize(self):
         """ Prepare the OAuth handshake and verify.
@@ -208,9 +195,6 @@ class TwitterSearch(Block):
             if resp.status_code != 200:
                 raise Exception("Status %s" % resp.status_code)
         except Exception as e:
-            print(type(e).__name__, str(e))
             self._logger.error("Authentication Failed"
                                "for consumer key: %s" %
                                self.creds.consumer_key)
-        
-    
