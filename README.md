@@ -1,5 +1,5 @@
 # Twitter Search
-A block that searches Twitter posts.
+A block that searches Twitter statuses.
 
 ## Properties
 * **consumer_key**: Twitter API key
