@@ -4,18 +4,19 @@ from enum import Enum
 from datetime import datetime, timedelta
 from urllib.parse import quote
 from requests_oauthlib import OAuth1
-from nio.common.block.base import Block
-from nio.common.signal.base import Signal
-from nio.common.discovery import Discoverable, DiscoverableType
-from nio.metadata.properties.string import StringProperty
-from nio.metadata.properties.timedelta import TimeDeltaProperty
-from nio.metadata.properties.int import IntProperty
-from nio.metadata.properties.list import ListProperty
-from nio.metadata.properties.bool import BoolProperty
-from nio.metadata.properties.select import SelectProperty
-from nio.metadata.properties.object import ObjectProperty
-from nio.metadata.properties.holder import PropertyHolder
+from nio.block.base import Block
+from nio.signal.base import Signal
+from nio.util.discovery import discoverable
+from nio.properties.string import StringProperty
+from nio.properties.timedelta import TimeDeltaProperty
+from nio.properties.int import IntProperty
+from nio.properties.list import ListProperty
+from nio.properties.bool import BoolProperty
+from nio.properties.select import SelectProperty
+from nio.properties.object import ObjectProperty
+from nio.properties.holder import PropertyHolder
 from nio.modules.scheduler import Job
+from nio.types import StringType
 
 
 VERIFY_CREDS_URL = ('https://api.twitter.com/1.1/'
@@ -46,30 +47,34 @@ class TwitterCreds(PropertyHolder):
     """ Property holder for Twitter OAuth credentials.
 
     """
-    consumer_key = StringProperty(title='Consumer Key')
-    app_secret = StringProperty(title='App Secret')
-    oauth_token = StringProperty(title='OAuth Token')
-    oauth_token_secret = StringProperty(title='OAuth Token Secret')
+    consumer_key = StringProperty(title='Consumer Key',
+                                  default='[[TWITTER_CONSUMER_KEY]]')
+    app_secret = StringProperty(title='App Secret',
+                                default='[[TWITTER_APP_SECRET]]')
+    oauth_token = StringProperty(title='OAuth Token',
+                                 default='[[TWITTER_OAUTH_TOKEN]]')
+    oauth_token_secret = StringProperty(title='OAuth Token Secret',
+                                        default='[[TWITTER_OAUTH_TOKEN_SECRET]]')
 
 
 class GeoCode(PropertyHolder):
     """ Property holder for a latitude and longitude
 
     """
-    latitude = StringProperty(title="Latitude")
-    longitude = StringProperty(title="Longitude")
-    radius = StringProperty(title="Radius (miles)")
+    latitude = StringProperty(title="Latitude", default='')
+    longitude = StringProperty(title="Longitude", default='')
+    radius = StringProperty(title="Radius (miles)", default='')
 
 
-@Discoverable(DiscoverableType.block)
+@discoverable
 class TwitterSearch(Block):
     interval = TimeDeltaProperty(title="Query Interval",
                                  default={"minutes": 10})
-    tweet_text = ListProperty(str, title="Text includes")
-    hashtags = ListProperty(str, title="Hashtags")
-    _from = StringProperty(title="From user")
-    _to = StringProperty(title="To user")
-    at = ListProperty(str, title="Referenced users")
+    tweet_text = ListProperty(StringType, title="Text includes", default=[])
+    hashtags = ListProperty(StringType, title="Hashtags", default=[])
+    _from = StringProperty(title="From user", default='')
+    _to = StringProperty(title="To user", default='')
+    at = ListProperty(StringType, title="Referenced users", default=[])
     geo = ObjectProperty(GeoCode, title="Geographical")
     count = IntProperty(title="Max Results", default=25)
     lookback = IntProperty(title="Query Lookback (days)", default=-1)
@@ -98,14 +103,14 @@ class TwitterSearch(Block):
 
     def configure(self, context):
         super().configure(context)
-    
+
     def start(self):
         super().start()
         self._authorize()
         self._construct_url()
         self._search_job = Job(
             self._search_tweets,
-            self.interval,
+            self.interval(),
             False,
             self._url
         )
@@ -127,41 +132,41 @@ class TwitterSearch(Block):
                     "{0}{1}".format(SEARCH_URL, next_results)
                 )
             else:
-                self._logger.debug("Scheduling next search...")
+                self.logger.debug("Scheduling next search...")
                 self._search_job = Job(
                     self._search_tweets,
-                    self.interval,
+                    self.interval(),
                     False,
                     self._url
                 )
 
         else:
-            self._logger.error(
+            self.logger.error(
                 "Twitter search failed with status {0}".format(status))
 
     def _construct_url(self):
         self._url = "{0}?".format(SEARCH_URL)
-        
+
         query = self._process_query()
 
         if query:
-            self._append_param('q', sep=self.operator.value, vals=query)
+            self._append_param('q', sep=self.operator().value, vals=query)
 
-        if self.geo.latitude:
+        if self.geo().latitude():
             self._append_param('geo', ',', 'mi',
-                               [self.geo.latitute,
-                                self.geo.longitude,
-                                self.geo.radius])
+                               [self.geo().latitude(),
+                                self.geo().longitude(),
+                                self.geo().radius()])
 
-        if self.lookback >= 0:
-            now = datetime.utcnow() - timedelta(days=self.lookback)
+        if self.lookback() >= 0:
+            now = datetime.utcnow() - timedelta(days=self.lookback())
             vals = [now.year, now.month, now.day]
             self._append_param('since', '-', vals=vals)
 
-        if self.count:
-            self._append_param('count', vals=[self.count])
+        if self.count():
+            self._append_param('count', vals=[self.count()])
 
-        self._append_param('result_type', vals=[self.result_type.value])
+        self._append_param('result_type', vals=[self.result_type().value])
 
     def _append_param(self, p_name, sep='', end='', vals=[]):
         val_str = quote(sep.join([str(v) for v in vals]) + end)
@@ -169,17 +174,17 @@ class TwitterSearch(Block):
 
     def _process_query(self):
         values = []
-        values.extend(self.tweet_text)
-        for h in self.hashtags:
+        values.extend(self.tweet_text())
+        for h in self.hashtags():
             values.append("#{0}".format(h))
-        for u in self.at:
+        for u in self.at():
             values.append("@{0}".format(u))
-        if self._from:
-            values.append("from:{0}".format(self._from))
-        if self._to:
-            values.append("to:{0}".format(self._to))
-        if self.tude.value:
-            values.append(self.tude.value)
+        if self._from():
+            values.append("from:{0}".format(self._from()))
+        if self._to():
+            values.append("to:{0}".format(self._to()))
+        if self.tude().value:
+            values.append(self.tude().value)
         return values
 
     def _authorize(self):
@@ -187,14 +192,14 @@ class TwitterSearch(Block):
 
         """
         try:
-            self._auth = OAuth1(self.creds.consumer_key,
-                          self.creds.app_secret,
-                          self.creds.oauth_token,
-                          self.creds.oauth_token_secret)
+            self._auth = OAuth1(self.creds().consumer_key(),
+                          self.creds().app_secret(),
+                          self.creds().oauth_token(),
+                          self.creds().oauth_token_secret())
             resp = requests.get(VERIFY_CREDS_URL, auth=self._auth)
             if resp.status_code != 200:
                 raise Exception("Status %s" % resp.status_code)
         except Exception as e:
-            self._logger.error("Authentication Failed"
+            self.logger.error("Authentication Failed"
                                "for consumer key: %s" %
-                               self.creds.consumer_key)
+                               self.creds().consumer_key())
