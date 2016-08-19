@@ -1,5 +1,5 @@
 # Twitter Search
-A block that searches Twitter statuses.
+A block that searches Twitter posts.
 
 ## Properties
 * **consumer_key**: Twitter API key
@@ -22,6 +22,9 @@ A block that searches Twitter statuses.
 * **result_type**: choose between `POPULAR`, `RECENT` or `MIXED` to specify what types of tweets to notify from search
 
 ## Dependencies
+None.
+
+## Commands
 None.
 
 ## Input
