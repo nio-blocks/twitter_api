@@ -2,8 +2,8 @@ from ..twitter_search_block import TwitterSearch
 from unittest.mock import patch
 from requests_oauthlib import OAuth1
 from requests import Response
-from nio.util.support.block_test_case import NIOBlockTestCase
-from nio.modules.threading import Event
+from nio.testing.block_test_case import NIOBlockTestCase
+from threading import Event
 
 
 class TSTestBlock(TwitterSearch):
@@ -20,7 +20,7 @@ class TSTestBlock(TwitterSearch):
 
 
 class TestTwitterSearch(NIOBlockTestCase):
-    
+
     @patch("requests.get")
     @patch("requests.Response.json")
     def test_produce_response(self, mock_json, mock_get):
