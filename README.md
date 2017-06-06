@@ -1,7 +1,9 @@
-# Twitter Search
+Twitter Search
+================
 A block that searches Twitter statuses.
 
-## Properties
+Properties
+-------------
 * **consumer_key**: Twitter API key
 * **app_secret**: Twitter API secret
 * **oauth_token**: Twitter access token
@@ -21,16 +23,20 @@ A block that searches Twitter statuses.
 * **operator**: choose between `AND` and `OR`
 * **result_type**: choose between `POPULAR`, `RECENT` or `MIXED` to specify what types of tweets to notify from search
 
-## Dependencies
+Dependencies
+-------------
 None.
 
-## Commands
+Commands
+-------------
 None.
 
-## Input
+Input
+-------------
 Any list of signals.
 
-## Output
+Output
+-------------
 The following is an example of the output signals notified from the block after the Twitter API is searched with the configurable criteria. Note that there may be more attributes output than what is listed below, and not all of the listed attributes are guaranteed to be included on every signal.
 
 ```

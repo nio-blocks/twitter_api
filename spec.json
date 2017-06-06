@@ -1,0 +1,69 @@
+{
+  "nio/Twitter Search": {
+    "Dependencies": [
+      "None."
+    ],
+    "Version": "1.0.0",
+    "Description": "A block that searches Twitter statuses.",
+    "Output": "The following is an example of the output signals notified from the block after the Twitter API is searched with the configurable criteria. Note that there may be more attributes output than what is listed below, and not all of the listed attributes are guaranteed to be included on every signal.\n```\n{\nstatuses: [\n{\ncoordinates: string\nfavorited: boolean,\ncreated_at: datetime,\ntext: string,\nmetadata: {\niso_language_code: string,\nresult_type: string\n},\nretweet_count: int,\ngeo: null,\nretweeted: boolean,\nuser: {\nname: string,\nprofile_image_url: string,\ncreated_at: string,\nlocation: string,\nid: int,\nfollowers_count: int,\nprotected: boolean,\ngeo_enabled: boolean,\ndescription: string,\nstatuses_count: int,\nfriends_count: int,\n},\n},\n...\n],\n}\n```",
+    "Category": "WebService",
+    "Commands": {},
+    "Input": "Any list of signals.",
+    "Properties": {
+      "_from": {
+        "description": "user's tweets to search"
+      },
+      "app_secret": {
+        "description": "Twitter API secret"
+      },
+      "count": {
+        "description": "maximum tweets to notify from search results"
+      },
+      "lookback": {
+        "description": "how far to look back for tweets"
+      },
+      "result_type": {
+        "description": "choose between `POPULAR`, `RECENT` or `MIXED` to specify what types of tweets to notify from search"
+      },
+      "_to": {
+        "description": "search tweets to this user"
+      },
+      "longitude": {
+        "description": "longitude for location to search for tweets"
+      },
+      "oauth_token": {
+        "description": "Twitter access token"
+      },
+      "latitude": {
+        "description": "latitude for location to search for tweets"
+      },
+      "hashtags": {
+        "description": "hashtags to search for in tweets"
+      },
+      "at": {
+        "description": "list of users who were referenced in tweets using `@` character"
+      },
+      "tweet_text": {
+        "description": "keywords to search for in tweets"
+      },
+      "radius": {
+        "description": "how far from `latitude` and `longitude` position to search for tweets"
+      },
+      "oauth_token_secret": {
+        "description": "Twitter access token secret"
+      },
+      "tude": {
+        "description": "choose from `NEUTRAL`, `QUESTION`, `NEGATIVE` and `POSITIVE` to specify the tone of the tweets that should be notified from block"
+      },
+      "interval": {
+        "description": "how often the API is polled"
+      },
+      "consumer_key": {
+        "description": "Twitter API key"
+      },
+      "operator": {
+        "description": "choose between `AND` and `OR`"
+      }
+    }
+  }
+}
