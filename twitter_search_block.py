@@ -1,22 +1,16 @@
 import requests
-import json
 from enum import Enum
 from datetime import datetime, timedelta
 from urllib.parse import quote
 from requests_oauthlib import OAuth1
+
 from nio.block.base import Block
 from nio.signal.base import Signal
-from nio.util.discovery import discoverable
-from nio.properties.string import StringProperty
-from nio.properties.timedelta import TimeDeltaProperty
-from nio.properties.int import IntProperty
-from nio.properties.list import ListProperty
-from nio.properties.bool import BoolProperty
-from nio.properties.select import SelectProperty
-from nio.properties.object import ObjectProperty
-from nio.properties.holder import PropertyHolder
 from nio.modules.scheduler import Job
 from nio.types import StringType
+from nio.properties import (StringProperty, TimeDeltaProperty, IntProperty,
+                            ListProperty, SelectProperty, ObjectProperty,
+                            PropertyHolder, VersionProperty)
 
 
 VERIFY_CREDS_URL = ('https://api.twitter.com/1.1/'
@@ -53,8 +47,9 @@ class TwitterCreds(PropertyHolder):
                                 default='[[TWITTER_APP_SECRET]]')
     oauth_token = StringProperty(title='OAuth Token',
                                  default='[[TWITTER_OAUTH_TOKEN]]')
-    oauth_token_secret = StringProperty(title='OAuth Token Secret',
-                                        default='[[TWITTER_OAUTH_TOKEN_SECRET]]')
+    oauth_token_secret = StringProperty(
+        title='OAuth Token Secret',
+        default='[[TWITTER_OAUTH_TOKEN_SECRET]]')
 
 
 class GeoCode(PropertyHolder):
@@ -66,8 +61,8 @@ class GeoCode(PropertyHolder):
     radius = StringProperty(title="Radius (miles)", default='')
 
 
-@discoverable
 class TwitterSearch(Block):
+    version = VersionProperty("1.0.0")
     interval = TimeDeltaProperty(title="Query Interval",
                                  default={"minutes": 10})
     tweet_text = ListProperty(StringType, title="Text includes", default=[])
@@ -193,13 +188,13 @@ class TwitterSearch(Block):
         """
         try:
             self._auth = OAuth1(self.creds().consumer_key(),
-                          self.creds().app_secret(),
-                          self.creds().oauth_token(),
-                          self.creds().oauth_token_secret())
+                                self.creds().app_secret(),
+                                self.creds().oauth_token(),
+                                self.creds().oauth_token_secret())
             resp = requests.get(VERIFY_CREDS_URL, auth=self._auth)
             if resp.status_code != 200:
                 raise Exception("Status %s" % resp.status_code)
         except Exception as e:
             self.logger.error("Authentication Failed"
-                               "for consumer key: %s" %
-                               self.creds().consumer_key())
+                              "for consumer key: %s" %
+                              self.creds().consumer_key())

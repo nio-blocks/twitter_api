@@ -1,10 +1,108 @@
 {
   "nio/TwitterSearch": {
-    "version": "0.0.1",
-    "description": "",
-    "inputs": {},
-    "outputs": {},
-    "properties": {},
+    "version": "1.0.0",
+    "description": "A block that searches Twitter statuses.",
+    "properties": {
+      "_from": {
+        "title": "From user",
+        "type": "StringType",
+        "description": "user's tweets to search",
+        "default": ""
+      },
+      "_to": {
+        "title": "To user",
+        "type": "StringType",
+        "description": "search tweets to this user",
+        "default": ""
+      },
+      "at": {
+        "title": "Referenced users",
+        "type": "ListType",
+        "description": "list of users who were referenced in tweets using `@` character",
+        "default": []
+      },
+      "count": {
+        "title": "Max Results",
+        "type": "IntType",
+        "description": "maximum tweets to notify from search results",
+        "default": 25
+      },
+      "creds": {
+        "title": "Credentials",
+        "type": "ObjectType",
+        "description": "Twitter credentials.",
+        "default": {
+          "consumer_key": "[[TWITTER_CONSUMER_KEY]]",
+          "oauth_token_secret": "[[TWITTER_OAUTH_TOKEN_SECRET]]",
+          "app_secret": "[[TWITTER_APP_SECRET]]",
+          "oauth_token": "[[TWITTER_OAUTH_TOKEN]]"
+        }
+      },
+      "geo": {
+        "title": "Geographical",
+        "type": "ObjectType",
+        "description": "Radius, Latitude, and Longitude for location search.",
+        "default": {
+          "radius": "",
+          "latitude": "",
+          "longitude": ""
+        }
+      },
+      "hashtags": {
+        "title": "Hashtags",
+        "type": "ListType",
+        "description": "hashtags to search for in tweets",
+        "default": []
+      },
+      "interval": {
+        "title": "Query Interval",
+        "type": "TimeDeltaType",
+        "description": "how often the API is polled",
+        "default": {
+          "minutes": 10
+        }
+      },
+      "lookback": {
+        "title": "Query Lookback (days)",
+        "type": "IntType",
+        "description": "how far to look back for tweets",
+        "default": -1
+      },
+      "operator": {
+        "title": "Query Operator",
+        "type": "SelectType",
+        "description": "choose between `AND` and `OR`",
+        "default": " "
+      },
+      "result_type": {
+        "title": "Result Type",
+        "type": "SelectType",
+        "description": "choose between `POPULAR`, `RECENT` or `MIXED` to specify what types of tweets to notify from search",
+        "default": "mixed"
+      },
+      "tude": {
+        "title": "Tone",
+        "type": "SelectType",
+        "description": "choose from `NEUTRAL`, `QUESTION`, `NEGATIVE` and `POSITIVE` to specify the tone of the tweets that should be notified from block",
+        "default": ""
+      },
+      "tweet_text": {
+        "title": "Text includes",
+        "type": "ListType",
+        "description": "keywords to search for in tweets",
+        "default": []
+      }
+    },
+    "inputs": {
+      "default": {
+        "description": "Any list of signals."
+      }
+    },
+    "outputs": {
+      "default": {
+        "description": "Results of the twitter search based on the blocks configuration."
+      }
+    },
     "commands": {}
   }
 }
