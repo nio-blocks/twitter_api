@@ -34,11 +34,12 @@ Dependencies
 ------------
 None
 
-The following is an example of the output signals notified from the block after the Twitter API is searched with the configurable criteria. Note that there may be more attributes output than what is listed below, and not all of the listed attributes are guaranteed to be included on every signal.
 Commands
 --------
 None
 
+
+The following is an example of the output signals notified from the block after the Twitter API is searched with the configurable criteria. Note that there may be more attributes output than what is listed below, and not all of the listed attributes are guaranteed to be included on every signal.
 ```
 {
   statuses: [
