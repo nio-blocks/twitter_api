@@ -1,11 +1,15 @@
-from ..twitter_search_block import TwitterSearch
 from unittest.mock import patch
 from requests_oauthlib import OAuth1
 from requests import Response
-from nio.testing.block_test_case import NIOBlockTestCase
 from threading import Event
 
+from nio.testing.block_test_case import NIOBlockTestCase
+from nio.util.discovery import not_discoverable
 
+from ..twitter_search_block import TwitterSearch
+
+
+@not_discoverable
 class TSTestBlock(TwitterSearch):
     def __init__(self, event):
         super().__init__()
@@ -50,10 +54,11 @@ class TestTwitterSearch(NIOBlockTestCase):
     def test_complex_query(self, mock_json, mock_get):
         e = Event()
         blk = TSTestBlock(e)
-        expected_url = ("https://api.twitter.com/1.1/search/tweets.json?q=some"
-                        "%20OR%20text%20OR%20%23foo%20OR%20%23bar%20OR%20%40me"
-                        "%20OR%20%40you%20OR%20from%3AAlan&count=25&result_type"
-                        "=mixed&")
+        expected_url = (
+            "https://api.twitter.com/1.1/search/tweets.json?q=some"
+            "%20OR%20text%20OR%20%23foo%20OR%20%23bar%20OR%20%40me"
+            "%20OR%20%40you%20OR%20from%3AAlan&count=25&result_type"
+            "=mixed&")
         self.configure_block(blk, {
             'interval': {
                 'seconds': 2
