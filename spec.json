@@ -2,6 +2,9 @@
   "nio/TwitterSearch": {
     "version": "1.0.0",
     "description": "A block that searches Twitter statuses.",
+    "categories": [
+      "Social Media"
+    ],
     "properties": {
       "_from": {
         "title": "From user",
