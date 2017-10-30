@@ -32,7 +32,8 @@ None
 
 Dependencies
 ------------
-None
+-   [requests](https://pypi.python.org/pypi/requests/)
+-   [requests_oauthlib](https://pypi.python.org/pypi/requests-oauthlib)
 
 Commands
 --------
